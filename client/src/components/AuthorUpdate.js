@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../App.css";
 
-const AuthorForm = (props) => {
+const AuthorUpdate = (props) => {
+  const { _id } = useParams();
   const [author, setAuthor] = useState("");
   const [errors, setErrors] = useState([]);
-  const { allAuthors, setAllAuthors } = props;
   const navigate = useNavigate();
 
-  const onSubmitHandler = (e) => {
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/api/authors/" + _id)
+      .then((res) => {
+        setAuthor(res.data.name);
+        console.log(author);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  const updateAuthor = (e) => {
     e.preventDefault();
 
     axios
-      .post("http://localhost:8000/api/authors", {
+      .put("http://localhost:8000/api/authors/" + _id, {
         name: author,
       })
       .then((res) => {
-        console.log(res.data);
-        setAllAuthors([...allAuthors, res.data]);
-        setAuthor("");
+        console.log(res);
         navigate("/");
       })
       .catch((err) => {
@@ -34,13 +42,10 @@ const AuthorForm = (props) => {
 
   return (
     <div>
-      <h1>Create New Author</h1>
-      <div className="updateDiv" style={{ marginTop: 50 }}>
-        <form onSubmit={onSubmitHandler}>
-          <label style={{ fontWeight: "bolder", fontSize: "x-large" }}>
-            Name
-          </label>
-          <br />
+      <h1>Update Author</h1>
+      <div className="updateDiv">
+        <form onSubmit={updateAuthor}>
+          <label style={{ fontWeight: "bold" }}>Name</label> <br />
           {errors.map((err, index) => (
             <p style={{ color: "red" }} key={index}>
               {err}
@@ -57,8 +62,8 @@ const AuthorForm = (props) => {
           <br />
           <input style={{ margin: 3 }} className="button3" type="submit" />
           <button
-            style={{ margin: 3 }}
             className="button"
+            style={{ margin: 3 }}
             onClick={() => navigate("/")}
           >
             Cancel
@@ -69,4 +74,4 @@ const AuthorForm = (props) => {
   );
 };
 
-export default AuthorForm;
+export default AuthorUpdate;
